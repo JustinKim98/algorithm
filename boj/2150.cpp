@@ -10,6 +10,7 @@ std::vector<bool> done;
 
 int minCnt = 0;
 
+// Tarjan's algorithm
 int tarjan(int index, const std::vector<std::deque<int>> &vertices, std::vector<int> &min, std::vector<bool> &done)
 {
     minCnt += 1;
@@ -45,7 +46,6 @@ int tarjan(int index, const std::vector<std::deque<int>> &vertices, std::vector<
         sccs.emplace_back(scc);
     }
 
-    // std::cout << "childMin : " << childMin << "\n";
     return childMin;
 }
 
