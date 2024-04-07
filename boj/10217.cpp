@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <limits>
 
+#define INF 1000000000
+
 // visited array in [id][cost]
 int minDist[101][10001];
 
@@ -14,55 +16,57 @@ struct Point
     int Id;
     int Cost;
     int Dist;
+};
 
-    bool operator<(const Point &rhs) const
+struct Compare
+{
+    bool operator()(Point lhs, Point rhs)
     {
-        return Dist < rhs.Dist;
-    }
-
-    bool operator>(const Point &rhs) const
-    {
-        return Dist > rhs.Dist;
+        return lhs.Dist > rhs.Dist;
     }
 };
 
 // id, taken cost
-std::priority_queue<Point, std::vector<Point>, std::greater<>>
-    queue;
 
 bool dijkstra(const std::vector<std::deque<std::tuple<int, int, int>>> &airports)
 {
-    queue.emplace(Point{0, 0, 0});
+    std::priority_queue<Point, std::vector<Point>, Compare>
+        queue;
+
+    queue.emplace(Point{1, 0, 0});
+    minDist[1][0] = 0;
 
     while (!queue.empty())
     {
         auto curPoint = queue.top();
-        queue.pop();
         auto from = curPoint.Id;
         auto curCost = curPoint.Cost;
         auto curDist = curPoint.Dist;
+        queue.pop();
 
-        if (from == numAirports - 1)
+        if (from == numAirports)
             return true;
 
         if (minDist[from][curCost] < curDist)
             continue;
 
-        for (auto [to, cost, dist] : airports[from])
+        for (const auto &[to, cost, dist] : airports[from])
         {
-            if (curCost + cost > money)
+            auto nextCost = curCost + cost;
+            auto nextDist = curDist + dist;
+            if (nextCost > money)
                 continue;
 
-            if (minDist[to][curCost + cost] > minDist[from][curCost] + dist)
+            if (minDist[to][nextCost] > nextDist)
             {
-                queue.emplace(Point{to, curCost + cost, curDist + dist});
-                for (int i = curCost + cost; i <= money; ++i)
+                for (int i = nextCost; i <= money; ++i)
                 {
-                    if (minDist[to][i] > curDist + dist)
-                        minDist[to][i] = curDist + dist;
+                    if (minDist[to][i] > nextDist)
+                        minDist[to][i] = nextDist;
                     else
                         break;
                 }
+                queue.push(Point{to, nextCost, nextDist});
             }
         }
     }
@@ -76,30 +80,32 @@ int main()
     std::ios::sync_with_stdio(false);
     int testCases;
     std::cin >> testCases;
+    std::vector<std::deque<std::tuple<int, int, int>>> airports;
 
     for (int testIdx = 0; testIdx < testCases; ++testIdx)
     {
         std::cin >> numAirports >> money >> numTickets;
-        std::vector<std::deque<std::tuple<int, int, int>>> airports(numAirports);
+        airports.clear();
+        airports.resize(numAirports + 1);
 
         for (int i = 0; i < numTickets; ++i)
         {
             int from, to, cost, time;
             std::cin >> from >> to >> cost >> time;
-            airports[from - 1].emplace_back(std::make_tuple(to - 1, cost, time));
+            airports[from].push_back(std::make_tuple(to, cost, time));
         }
 
-        for (int i = 0; i < numAirports; ++i)
+        for (int i = 1; i <= numAirports; ++i)
         {
-            for (int j = 0; j <= money; ++j)
+            for (int j = 1; j <= money; ++j)
             {
-                minDist[i][j] = std::numeric_limits<int>::max();
+                minDist[i][j] = INF;
             }
         }
 
         if (dijkstra(airports))
         {
-            std::cout << minDist[numAirports - 1][money] << "\n";
+            std::cout << minDist[numAirports][money] << "\n";
         }
         else
         {
