@@ -16,14 +16,17 @@ std::vector<std::vector<long>> number(1000001);
 
 int arrLength = 0;
 
-void increasingSequence(const std::vector<long> &sequence) {
-  for (std::size_t i = 0; i < sequence.size(); ++i) {
+void increasingSequence(const std::vector<long> &sequence)
+{
+  for (std::size_t i = 0; i < sequence.size(); ++i)
+  {
     auto largestLength = std::lower_bound(
         smallestLastValue, smallestLastValue + arrLength + 1, sequence[i]);
 
     *largestLength = sequence[i];
 
-    if (largestLength == smallestLastValue + arrLength + 1) {
+    if (largestLength == smallestLastValue + arrLength + 1)
+    {
       arrLength += 1;
       prefixSumVector[arrLength].push_back(0);
       number[arrLength].push_back(-INF);
@@ -48,7 +51,8 @@ void increasingSequence(const std::vector<long> &sequence) {
   }
 }
 
-int main() {
+int main()
+{
   std::ios::sync_with_stdio(false);
   std::cin.tie(nullptr);
   std::cout.tie(nullptr);
@@ -59,7 +63,8 @@ int main() {
   smallestLastValue[0] = -INF;
   prefixSumVector[0] = {0, 1};
   number[0] = {-INF};
-  for (int i = 0; i < length; ++i) {
+  for (int i = 0; i < length; ++i)
+  {
     std::cin >> sequence[i];
   }
 
