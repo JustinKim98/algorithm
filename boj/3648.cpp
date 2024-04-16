@@ -8,12 +8,13 @@ bool done[20001];
 int minCnt[20001];
 int sccId[200001];
 int cnt = 0;
+int sccNum = 0;
 int numVars, numTokens;
 
 std::deque<int> stack;
-std::deque<std::unordered_set<int>> sccs;
 // id = given + 10000;
 std::unordered_map<int, std::unordered_set<int>> graph;
+std::unordered_set<int> ids;
 
 inline int getOriginId(int id)
 {
@@ -28,11 +29,6 @@ inline int getStoreId(int id)
 inline bool negative(int id)
 {
     return id < 10000;
-}
-
-bool getNegativeStoreId(int id)
-{
-    return getStoreId(-getOriginId(id));
 }
 
 inline int getVarId(int id)
@@ -65,70 +61,28 @@ int tarjan(int id)
 
     if (childMin == curCnt)
     {
-        std::unordered_set<int> scc;
         while (true)
         {
             auto poppedId = stack.back();
             stack.pop_back();
-            scc.emplace(poppedId);
-            sccId[poppedId] = sccs.size();
+            sccId[poppedId] = sccNum;
             done[poppedId] = true;
             if (poppedId == id)
                 break;
         }
-        sccs.emplace_back(scc);
+        sccNum += 1;
     }
 
     return childMin;
 }
 
-bool hasSolution()
-{
-    for (const auto &scc : sccs)
-    {
-        for (auto id : scc)
-        {
-            if (negative(id) && scc.find(getStoreId(-getOriginId(id))) != scc.end())
-                return false;
-        }
-    }
-    return true;
-}
-
-int ans[200001];
-
-bool isPossible(int curId)
-{
-    const auto curSccId = sccId[curId];
-    const auto &curScc = sccs[sccId[curId]];
-    for (const auto id : curScc)
-    {
-        if (ans[id] == 0 || ans[getNegativeStoreId(id)] == 1)
-            return false;
-
-        ans[id] = 1;
-        ans[getNegativeStoreId(id)] = 0;
-    }
-
-    for (const auto id : curScc)
-    {
-        for (auto next : graph[id])
-        {
-            if (sccId[next] != curSccId && !isPossible(next))
-                return false;
-        }
-    }
-
-    return true;
-}
-
 int main()
 {
+    // std::cin.tie(0);
+    // std::cout.tie(0);
+    // std::ios::sync_with_stdio(false);
     while (std::cin >> numVars >> numTokens)
     {
-        graph.clear();
-        sccs.clear();
-        stack.clear();
         for (int i = 0; i < numTokens; ++i)
         {
             int from, to;
@@ -142,7 +96,6 @@ int main()
         {
             done[i] = false;
             minCnt[i] = 0;
-            ans[i] = -1;
         }
 
         for (int i = 1; i <= numVars; ++i)
@@ -153,10 +106,17 @@ int main()
                 tarjan(getStoreId(-i));
         }
 
-        if (hasSolution())
-            std::cout << "yes\n";
-        else
-            std::cout << "no\n";
+        bool isValid = true;
+        for (int id = 1; id <= numVars; ++id)
+        {
+            if (sccId[getStoreId(id)] == sccId[getStoreId(-id)])
+            {
+                isValid = false;
+                break;
+            }
+        }
+
+        std::cout << (isValid ? "yes\n" : "no\n");
     }
 
     return 0;

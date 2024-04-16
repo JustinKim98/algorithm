@@ -78,6 +78,9 @@ int tarjan(int id)
 
 int main()
 {
+    std::cin.tie(0);
+    std::cout.tie(0);
+    std::ios::sync_with_stdio(false);
     std::cin >> numVars >> numTokens;
 
     for (int i = 0; i < numTokens; ++i)
